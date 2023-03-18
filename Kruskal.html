@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="http://cdn.bootcss.com/normalize/5.0.0/normalize.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://stackedit.cn/style.css" />
+  <link rel="shortcut icon" href="favicon.ico">
+  <title>Kruskal算法</title>
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p>最小生成树Kruskal算法</p>
+<h1 id="并查集"><span class="prefix"></span><span class="content">并查集</span><span class="suffix"></span></h1>
+<h2 id="定义"><span class="prefix"></span><span class="content">定义</span><span class="suffix"></span></h2>
+<p>并查集是一种树形数据结构，支持两种操作：</p>
+<p>合并：将两个子集合并成一个子集<br>
+查找：确定某个元素处在哪个集合<br>
+<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">fa[x]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.1076em;">f</span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span></span></span></span></span> 存储节点 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span></span> 的父节点.初始化时，每个节点是一个集合，每个节点的父节点是他自己<br>
+<img src="https://cdn.luogu.com.cn/upload/image_hosting/ghu0za61.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""><img src="https://cdn.luogu.com.cn/upload/image_hosting/ghu0za61.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h2 id="两种操作"><span class="prefix"></span><span class="content">两种操作</span><span class="suffix"></span></h2>
+<h3 id="查找"><span class="prefix"></span><span class="content">查找</span><span class="suffix"></span></h3>
+<p>根节点是集合的代表，查找就是找到元素所在集合的根</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	<span class="token keyword">if</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>  
+	<span class="token keyword">return</span> <span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+</code></pre>
+<p>缺点：耗时，在查找时链条较长。<br>
+优化：带路径压缩的查找，在返回的路上顺带修改父节点的根</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	<span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>  
+	<span class="token keyword">return</span> fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+</code></pre>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/rzvc5ijr.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""><img src="https://cdn.luogu.com.cn/upload/image_hosting/rzvc5ijr.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h3 id="合并"><span class="prefix"></span><span class="content">合并</span><span class="suffix"></span></h3>
+<p>合并就是把一个集合根指向另一个集合的根，只需要修改根即可</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">void</span> <span class="token function">union1</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span><span class="token keyword">int</span> y<span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	fa<span class="token punctuation">[</span><span class="token function">find</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+</code></pre>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/9yuyadzf.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""><img src="https://cdn.luogu.com.cn/upload/image_hosting/9yuyadzf.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h1 id="kruskal算法"><span class="prefix"></span><span class="content">Kruskal算法</span><span class="suffix"></span></h1>
+<p>Kruskal 算法是利用并查集求MST（最小生成树）的算法</p>
+<h2 id="数据定义"><span class="prefix"></span><span class="content">数据定义</span><span class="suffix"></span></h2>
+<p><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">e[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal">e</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span></span> 存储第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span></span> 条边起点、终点、边权。<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">fa[x]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.1076em;">f</span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span></span></span></span></span> 存储节点 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span></span> 的父节点</p>
+<h2 id="算法步骤"><span class="prefix"></span><span class="content">算法步骤</span><span class="suffix"></span></h2>
+<p>1 .初始化并查集，每一个节点是一个集合，每一个节点的父节点是他自己<br>
+2. 将所有边按边权大小从小到大排序<br>
+3. 按顺序枚举每一条边，如果这条边连接的两点不在同一集合，就把这条边加到最小生成树，并且合并两个集合。如果这条边连接的两点在同一集合，则这条边是废边，跳过<br>
+4. 重复执行步骤 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">3</span></span></span></span></span> 直到选取 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6667em; vertical-align: -0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.2222em;"></span></span><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">1</span></span></span></span></span> 条边为止（最小生成树是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span></span> 个节点 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6667em; vertical-align: -0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.2222em;"></span></span><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">1</span></span></span></span></span> 条边，如果是<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span></span> 条边就是一个环）</p>
+<h1 id="代码"><span class="prefix"></span><span class="content">代码</span><span class="suffix"></span></h1>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token macro property">#<span class="token directive keyword">include</span><span class="token string">&lt;bits/stdc++.h&gt;</span>  </span>
+<span class="token keyword">using</span> <span class="token keyword">namespace</span> std<span class="token punctuation">;</span>  
+<span class="token keyword">const</span> <span class="token keyword">int</span> N<span class="token operator">=</span><span class="token number">2</span><span class="token operator">*</span><span class="token number">1e5</span><span class="token operator">+</span><span class="token number">10</span><span class="token punctuation">;</span>  
+<span class="token keyword">int</span> n<span class="token punctuation">,</span>m<span class="token punctuation">,</span>fa<span class="token punctuation">[</span>N<span class="token punctuation">]</span><span class="token punctuation">,</span>ans<span class="token punctuation">,</span>cnt<span class="token punctuation">;</span>  
+<span class="token keyword">struct</span> edge<span class="token punctuation">{</span>  
+	<span class="token keyword">int</span> u<span class="token punctuation">,</span>v<span class="token punctuation">,</span>w<span class="token punctuation">;</span>  
+	<span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token keyword">const</span> edge <span class="token operator">&amp;</span>a<span class="token punctuation">)</span><span class="token keyword">const</span><span class="token punctuation">{</span>  
+		<span class="token keyword">return</span> w<span class="token operator">&lt;</span>a<span class="token punctuation">.</span>w<span class="token punctuation">;</span>  
+	<span class="token punctuation">}</span>  
+<span class="token punctuation">}</span>e<span class="token punctuation">[</span>N<span class="token punctuation">]</span><span class="token punctuation">;</span>  
+<span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	<span class="token keyword">if</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>  
+	<span class="token keyword">return</span> fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+<span class="token keyword">bool</span> <span class="token function">kruskal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	<span class="token function">sort</span><span class="token punctuation">(</span>e<span class="token punctuation">,</span>e<span class="token operator">+</span>m<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>n<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span> fa<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">=</span>i<span class="token punctuation">;</span>  
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>m<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>  
+		<span class="token keyword">int</span> x<span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>u<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+		<span class="token keyword">int</span> y<span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>v<span class="token punctuation">)</span><span class="token punctuation">;</span>  
+		<span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">!=</span>y<span class="token punctuation">)</span><span class="token punctuation">{</span>  
+			fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span>y<span class="token punctuation">;</span>  
+			ans<span class="token operator">+</span><span class="token operator">=</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>w<span class="token punctuation">;</span>  
+			cnt<span class="token operator">++</span><span class="token punctuation">;</span>  
+		<span class="token punctuation">}</span>  
+	<span class="token punctuation">}</span>  
+	<span class="token keyword">return</span> cnt<span class="token operator">==</span>n<span class="token number">-1</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>  
+	cin<span class="token operator">&gt;&gt;</span>n<span class="token operator">&gt;&gt;</span>m<span class="token punctuation">;</span>  
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>m<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>  
+		cin<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>u<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>v<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>w<span class="token punctuation">;</span>  
+	<span class="token punctuation">}</span>  
+	<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">kruskal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> cout<span class="token operator">&lt;&lt;</span>ans<span class="token punctuation">;</span>  
+	<span class="token keyword">else</span> cout<span class="token operator">&lt;&lt;</span><span class="token string">"orz"</span><span class="token punctuation">;</span>  
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>  
+<span class="token punctuation">}</span>  
+</code></pre>
+<h1 id="最小生成树算法对比"><span class="prefix"></span><span class="content">最小生成树算法对比</span><span class="suffix"></span></h1>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/7qqpej45.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""><img src="https://cdn.luogu.com.cn/upload/image_hosting/7qqpej45.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<ul>
+<li></li>
+<li></li>
+</ul>
+<h1 id="并查集-1"><span class="prefix"></span><span class="content">并查集</span><span class="suffix"></span></h1>
+<h2 id="定义-1"><span class="prefix"></span><span class="content">定义</span><span class="suffix"></span></h2>
+<p>并查集是一种树形数据结构，支持两种操作：</p>
+<p>合并：将两个子集合并成一个子集<br>
+查找：确定某个元素处在哪个集合<br>
+fa[x]fa[x] 存储节点 xx 的父节点.初始化时，每个节点是一个集合，每个节点的父节点是他自己<br>
+<img src="https://cdn.luogu.com.cn/upload/image_hosting/ghu0za61.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h2 id="两种操作-1"><span class="prefix"></span><span class="content">两种操作</span><span class="suffix"></span></h2>
+<h3 id="查找-1"><span class="prefix"></span><span class="content">查找</span><span class="suffix"></span></h3>
+<p>根节点是集合的代表，查找就是找到元素所在集合的根</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>缺点：耗时，在查找时链条较长。<br>
+优化：带路径压缩的查找，在返回的路上顺带修改父节点的根</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>
+	<span class="token keyword">return</span> fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/rzvc5ijr.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h3 id="合并-1"><span class="prefix"></span><span class="content">合并</span><span class="suffix"></span></h3>
+<p>合并就是把一个集合根指向另一个集合的根，只需要修改根即可</p>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token keyword">void</span> <span class="token function">union1</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span><span class="token keyword">int</span> y<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	fa<span class="token punctuation">[</span><span class="token function">find</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/9yuyadzf.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<h1 id="kruskal算法-1"><span class="prefix"></span><span class="content">Kruskal算法</span><span class="suffix"></span></h1>
+<p>Kruskal 算法是利用并查集求MST（最小生成树）的算法</p>
+<h2 id="数据定义-1"><span class="prefix"></span><span class="content">数据定义</span><span class="suffix"></span></h2>
+<p>e[i]e[i] 存储第 ii 条边起点、终点、边权。fa[x]fa[x] 存储节点 xx 的父节点</p>
+<h2 id="算法步骤-1"><span class="prefix"></span><span class="content">算法步骤</span><span class="suffix"></span></h2>
+<p>1 .初始化并查集，每一个节点是一个集合，每一个节点的父节点是他自己<br>
+2. 将所有边按边权大小从小到大排序<br>
+3. 按顺序枚举每一条边，如果这条边连接的两点不在同一集合，就把这条边加到最小生成树，并且合并两个集合。如果这条边连接的两点在同一集合，则这条边是废边，跳过<br>
+4. 重复执行步骤 33 直到选取 n-1n−1 条边为止（最小生成树是 nn 个节点 n-1n−1 条边，如果是nn 条边就是一个环）</p>
+<h1 id="代码-1"><span class="prefix"></span><span class="content">代码</span><span class="suffix"></span></h1>
+<pre class=" language-cpp"><code class="prism  language-cpp"><span class="token macro property">#<span class="token directive keyword">include</span><span class="token string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="token keyword">using</span> <span class="token keyword">namespace</span> std<span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token keyword">int</span> N<span class="token operator">=</span><span class="token number">2</span><span class="token operator">*</span><span class="token number">1e5</span><span class="token operator">+</span><span class="token number">10</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> n<span class="token punctuation">,</span>m<span class="token punctuation">,</span>fa<span class="token punctuation">[</span>N<span class="token punctuation">]</span><span class="token punctuation">,</span>ans<span class="token punctuation">,</span>cnt<span class="token punctuation">;</span>
+<span class="token keyword">struct</span> edge<span class="token punctuation">{</span>
+	<span class="token keyword">int</span> u<span class="token punctuation">,</span>v<span class="token punctuation">,</span>w<span class="token punctuation">;</span>
+	<span class="token keyword">bool</span> <span class="token keyword">operator</span><span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token keyword">const</span> edge <span class="token operator">&amp;</span>a<span class="token punctuation">)</span><span class="token keyword">const</span><span class="token punctuation">{</span>
+		<span class="token keyword">return</span> w<span class="token operator">&lt;</span>a<span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>e<span class="token punctuation">[</span>N<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">find</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">==</span>x<span class="token punctuation">)</span> <span class="token keyword">return</span> x<span class="token punctuation">;</span>
+	<span class="token keyword">return</span> fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">bool</span> <span class="token function">kruskal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">sort</span><span class="token punctuation">(</span>e<span class="token punctuation">,</span>e<span class="token operator">+</span>m<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>n<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span> fa<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">=</span>i<span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span>m<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">int</span> x<span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>u<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">int</span> y<span class="token operator">=</span><span class="token function">find</span><span class="token punctuation">(</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>v<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">!=</span>y<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			fa<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token operator">=</span>y<span class="token punctuation">;</span>
+			ans<span class="token operator">+</span><span class="token operator">=</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+			cnt<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> cnt<span class="token operator">==</span>n<span class="token number">-1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	cin<span class="token operator">&gt;&gt;</span>n<span class="token operator">&gt;&gt;</span>m<span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>m<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		cin<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>u<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>v<span class="token operator">&gt;&gt;</span>e<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">kruskal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> cout<span class="token operator">&lt;&lt;</span>ans<span class="token punctuation">;</span>
+	<span class="token keyword">else</span> cout<span class="token operator">&lt;&lt;</span><span class="token string">"orz"</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h1 id="最小生成树算法对比-1"><span class="prefix"></span><span class="content">最小生成树算法对比</span><span class="suffix"></span></h1>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/7qqpej45.png?x-oss-process=image/resize,m_lfit,h_340,w_450" alt=""></p>
+<ul>
+<li></li>
+</ul>
+<p>Markdown 1828 字符 1621 字数 91 行数 第 1 行, 第 0 列</p>
+<p>HTML 1161 字数 72 段落</p>
+</div>
+</body>
+
+</html>
